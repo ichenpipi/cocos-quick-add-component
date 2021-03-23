@@ -12,4 +12,6 @@ module.exports = {
     'apply': 'Apply',
     'quoteError': 'Do not use double quotes!',
     'customError': 'Please specify a hotkey!',
+    'nodeError': 'Please select node(s) first!',
+    'dataError': 'Load components data failed, please reopen the search bar and try again!',
 };

@@ -71,7 +71,7 @@ For example, on my Windows computer, the full path of `main.js` file should be `
 
 1. Select several nodes in "Node Tree".
 
-2. Press the hotkey (The default is `F1`) or click on *Extension -> Quick Add Component -> Search* option to open the search bar.
+2. Press the hotkey (The default is `F3`) or click on *Extension -> Quick Add Component -> Search* option to open the search bar.
 
 3. Enter the component name then you'll get a list of components.
 

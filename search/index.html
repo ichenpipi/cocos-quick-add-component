@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
     <meta charset="utf-8">
@@ -9,30 +9,24 @@
 
 <body>
     <!-- DOM -->
-    <div id="app" class="root">
+    <div id="app" class="main">
         <!-- 搜索 -->
         <div class="search">
             <!-- 输入框 -->
-            <input class="search-input" ref="input" type="text" v-model="keyword" :placeholder="placeholder"
-                @input="onInputChange" @keydown.enter="onEnterBtnClick" @keydown.up="onUpBtnClick"
-                @keydown.down="onDownBtnClick" autofocus></input>
+            <input class="search-input" ref="input" type="text" v-model="keyword" spellcheck="false"
+                :placeholder="placeholder" @input="onInputChange" @keydown.enter="onEnterBtnClick"
+                @keydown.up="onUpBtnClick" @keydown.down="onDownBtnClick" autofocus></input>
             <!-- 按钮 -->
             <button class="search-btn" v-text="button" @click="onEnterBtnClick"></button>
         </div>
         <!-- 结果列表 -->
         <div class="result" v-if="results.length > 0">
-            <!-- <transition-group class="result-list" name="result-list" tag="ul" mode="out-in" v-cloak>
-                <li v-for="(value, index) in results" :key="index" :id="'item-' + index"
-                    @click="onResultClick(value, index)"
-                    v-bind:class="[index === selectedIndex ? 'result-list-item-selected' : '']" v-cloak>
-                    {{value}}
-                </li>
-            </transition-group> -->
             <ul class="result-list">
-                <li v-for="(value, index) in results" :key="index" :id="'item-' + index"
-                    @click="onResultClick(value, index)"
-                    v-bind:class="[index === selectedIndex ? 'result-list-item-selected' : '']" v-cloak>
-                    {{value}}
+                <li class="result-list-item" v-for="(value, index) in results" :key="index" :id="'item-' + index"
+                    :class="[(index === selectedIndex) ? 'result-list-item-selected' : '']"
+                    @click="onResultClick(value, index)" v-cloak>
+                    <img class="result-list-item-icon" src="../images/assets/component.png" alt="icon"></img>
+                    <span>{{value.name}}</span>
                 </li>
             </ul>
         </div>

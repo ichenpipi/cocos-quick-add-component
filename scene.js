@@ -1,17 +1,14 @@
 module.exports = {
 
     /**
-     * 获取匹配关键字的组件
+     * 获取所有组件
      * @param {any} event 
-     * @param {string} keyword 关键字
      */
-    'match-keyword': function (event, keyword) {
-        // 模糊搜索，不区分大小写
-        keyword = keyword.toLowerCase();
-        // 获取匹配的组件列表
-        const names = this.getMatchComponents(keyword);
+    'get-all-components': function (event) {
+        // 获取所有组件
+        const components = this.getAllComponents();
         // 返回结果给主进程
-        event.reply(null, names);
+        event.reply(null, components);
     },
 
     /**
@@ -21,25 +18,23 @@ module.exports = {
      */
     'add-component': function (event, data) {
         // 获取组件 id
-        const classId = this.getComponentId(data.name);
+        const id = this.getComponentId(data.name);
+        if (!id) return;
         // 添加组件到节点
-        Editor.Ipc.sendToPanel('scene', 'scene:add-component', data.uuids, classId);
+        Editor.Ipc.sendToPanel('scene', 'scene:add-component', data.uuids, id);
         event.reply(null);
     },
 
     /**
-     * 获取匹配关键字的组件
-     * @param {string} keyword 
+     * 获取所有组件
      * @returns {string[]}
      */
-    getMatchComponents(keyword) {
+    getAllComponents() {
         // 组件菜单数据
         const items = cc._componentMenuItems;
         // 组件名列表
-        let names = items.map((item) => cc.js.getClassName(item.component));
-        // 过滤名称
-        names = names.filter((name) => name.toLowerCase().includes(keyword));
-        return names;
+        const components = items.map(item => cc.js.getClassName(item.component));
+        return components;
     },
 
     /**
@@ -55,6 +50,7 @@ module.exports = {
                 return cc.js._getClassId(component);
             }
         }
+        return null;
     },
 
-};
+}

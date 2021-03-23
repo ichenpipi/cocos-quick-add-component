@@ -1,4 +1,5 @@
-<div class="container">
+<div class="main">
+    <!-- 标题 -->
     <h2>{{titleLabel}}</h2>
     <ui-box-container class="layout vertical left">
         <div>
@@ -14,17 +15,17 @@
                     @change='onCustomChange'></ui-input>
             </ui-prop>
             <!-- 快捷键参考文档 -->
-            <ui-hint style="height: 60px; margin-left: 10px;" class="tiny top" position="-485px">
+            <ui-hint class="tip tiny top" position="-485px">
                 <ui-markdown style="height: 48px;" v-value="referenceLabel"></ui-markdown>
             </ui-hint>
             <!-- Git 仓库 -->
-            <ui-hint style="height: 60px; margin-left: 10px; margin-top: 5px;">
+            <ui-hint class="tip" style="margin-top: 5px;">
                 <ui-markdown style="height: 48px;" v-value="repositoryLabel"></ui-markdown>
             </ui-hint>
         </div>
         <br>
         <!-- 应用按钮 -->
-        <ui-button class="button blue big" v-disabled="isProcessing" @click="onApplyBtnClick()">{{applyLabel}}
+        <ui-button class="button blue big" @click="onApplyBtnClick" v-disabled="isProcessing">{{applyLabel}}
         </ui-button>
     </ui-box-container>
     <br>

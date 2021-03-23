@@ -19,6 +19,8 @@ new Vue({
     selected: null,
     /** 当前选中的结果下标 */
     selectedIndex: -1,
+    /** 分段加载定时器 */
+    loadHandler: null,
   },
 
   methods: {
@@ -31,9 +33,9 @@ new Vue({
       // 取消当前选中
       this.selected = null;
       this.selectedIndex = -1;
-      // 关键字为空时重置且不进行搜索
+      // 关键字为空或无效时不进行搜索
       const keyword = this.keyword;
-      if (keyword === '') {
+      if (keyword === '' || keyword.includes('...')) {
         this.results.length = 0;
         return;
       }
@@ -55,10 +57,7 @@ new Vue({
         this.selectedIndex = this.results.length - 1;
       }
       // 更新选择
-      this.selected = this.keyword = this.results[this.selectedIndex];
-      // 只有当目标元素不在可视区域内才滚动
-      const id = `item-${this.selectedIndex}`;
-      document.getElementById(id).scrollIntoViewIfNeeded(false);
+      this.updateSelected();
     },
 
     /**
@@ -75,7 +74,15 @@ new Vue({
         this.selectedIndex++;
       }
       // 更新选择
-      this.selected = this.keyword = this.results[this.selectedIndex];
+      this.updateSelected();
+    },
+
+    /**
+     * 更新当前的选择
+     */
+    updateSelected() {
+      this.selected = this.results[this.selectedIndex];
+      this.keyword = this.selected.name;
       // 只有当目标元素不在可视区域内才滚动
       const id = `item-${this.selectedIndex}`;
       document.getElementById(id).scrollIntoViewIfNeeded(false);
@@ -87,8 +94,9 @@ new Vue({
      * @param {number} index 
      */
     onResultClick(value, index) {
-      this.selected = this.keyword = value;
       this.selectedIndex = parseInt(index);
+      this.selected = value;
+      this.keyword = value.name;
       // 添加组件
       this.onEnterBtnClick(null);
       // 聚焦到输入框（此时焦点在列表上）
@@ -101,8 +109,8 @@ new Vue({
      * @param {*} event 
      */
     onEnterBtnClick(event) {
-      const component = this.selected;
-      if (!component) {
+      const selected = this.selected;
+      if (!selected) {
         if (this.keyword === '') return;
         // 输入框文本动画
         const input = this.$refs.input;
@@ -110,9 +118,9 @@ new Vue({
         setTimeout(() => input.classList.remove('search-input-error'), 500);
         return;
       }
-      this.keyword = component;
+      this.keyword = selected.name;
       // 发消息给主进程
-      ipcRenderer.send(`${PACKAGE_NAME}:add-component`, component);
+      ipcRenderer.send(`${PACKAGE_NAME}:add-component`, selected.name);
       // 聚焦到输入框（此时焦点在按钮或列表上）
       this.focusOnInputField();
     },
@@ -127,31 +135,55 @@ new Vue({
     /**
      * （主进程）获取语言回调
      * @param {*} event 
-     * @param {string} lang 
+     * @param {string} lang 语言
      */
     onGetLangReply(event, lang) {
-      if (lang.includes('zh')) {
-        this.placeholder = '请输入组件名称...';
-        this.button = '确认';
-      } else {
-        this.placeholder = 'Component name...';
-        this.button = 'Add';
-      }
+      const texts = lang.includes('zh') ? zh : en;
+      this.placeholder = texts.placeholder;
+      this.button = texts.button;
     },
 
     /**
      * （主进程）匹配关键词回调
      * @param {*} event 
-     * @param {string[]} results 
+     * @param {string[]} results 结果
      */
     onMatchKeywordReply(event, results) {
-      // 更新结果列表
-      this.results = results;
+      // 确保清除已有数据
+      this.results.length = 0;
       // 当只有一个结果时直接选中
       if (results.length === 1) {
+        this.results = results;
         this.selectedIndex = 0;
         this.selected = results[0];
+        return;
       }
+      // 结果数量多时分段加载
+      if (results.length >= 300) {
+        // 每次加载的数量
+        const threshold = 150;
+        // 分段加载函数
+        const load = () => {
+          const length = results.length,
+            count = length >= threshold ? threshold : length,
+            part = results.splice(0, count);
+          // 加载一部分
+          this.results.push(...part);
+          // 是否还有数据
+          if (results.length > 0) {
+            // 下一波继续
+            this.loadHandler = setTimeout(load);
+          } else {
+            // Done
+            this.loadHandler = null;
+          }
+        }
+        // 开始加载
+        load();
+        return;
+      }
+      // 数量不多，更新结果列表
+      this.results = results;
     },
 
     /**
@@ -169,13 +201,11 @@ new Vue({
    * 生命周期：挂载后
    */
   mounted() {
-    // 监听获取语言回调事件
+    // 监听事件
     ipcRenderer.on(`${PACKAGE_NAME}:get-lang-reply`, this.onGetLangReply.bind(this));
-    // 监听关键词匹配回调事件
     ipcRenderer.on(`${PACKAGE_NAME}:match-keyword-reply`, this.onMatchKeywordReply.bind(this));
-    // 监听添加组件回调事件
     ipcRenderer.on(`${PACKAGE_NAME}:add-component-reply`, this.onAddComponentReply.bind(this));
-    // 发送获取语言事件
+    // 发送事件：获取语言
     ipcRenderer.send(`${PACKAGE_NAME}:get-lang`);
     // （下一帧）聚焦到输入框
     this.$nextTick(() => this.focusOnInputField());
@@ -192,3 +222,15 @@ new Vue({
   },
 
 });
+
+/** 多语言：中文 */
+const zh = {
+  placeholder: '请输入组件名称...',
+  button: '确认'
+}
+
+/** 多语言：英语 */
+const en = {
+  placeholder: 'Component name...',
+  button: 'Add'
+}
