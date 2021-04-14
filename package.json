@@ -22,7 +22,8 @@
       "accelerator": "F3"
     },
     "i18n:MAIN_MENU.package.title/i18n:ccc-quick-add-component.name/i18n:ccc-quick-add-component.setting": {
-      "message": "ccc-quick-add-component:open-setting-panel"
+      "message": "ccc-quick-add-component:open-setting-panel",
+      "icon": "/images/setting.png"
     }
   },
   "panel.setting": {
