@@ -1,28 +1,19 @@
-const Fs = require('fs');
 const Path = require('path');
+const Fs = require('fs');
+
+/** 包名 */
+const PACKAGE_NAME = 'ccc-quick-add-component';
 
 /** package.json 的路径 */
 const packageJsonPath = Path.join(__dirname, 'package.json');
 
-/** package.json 中的 key */
-const itemKey = 'i18n:MAIN_MENU.package.title/i18n:ccc-quick-add-component.name/i18n:ccc-quick-add-component.search';
+/** package.json 中的菜单项 key */
+const menuItemKey = `i18n:MAIN_MENU.package.title/i18n:${PACKAGE_NAME}.name/i18n:${PACKAGE_NAME}.search`;
 
-/** 配置管理器 */
+/**
+ * 配置管理器
+ */
 const ConfigManager = {
-
-    /**
-     * 保存配置
-     * @param {{ hotkey: string }} config 配置
-     */
-    save(config) {
-        // 快捷键
-        const jsonData = JSON.parse(Fs.readFileSync(packageJsonPath)),
-            item = jsonData['main-menu'][itemKey];
-        if (item['accelerator'] !== config.hotkey) {
-            item['accelerator'] = config.hotkey;
-            Fs.writeFileSync(packageJsonPath, JSON.stringify(jsonData, null, 2));
-        }
-    },
 
     /**
      * 读取配置
@@ -31,10 +22,25 @@ const ConfigManager = {
     read() {
         const jsonData = JSON.parse(Fs.readFileSync(packageJsonPath)),
             config = Object.create(null);
-        config.hotkey = jsonData['main-menu'][itemKey]['accelerator'];
-        // 返回配置
+        // 快捷键
+        config.hotkey = jsonData['main-menu'][menuItemKey]['accelerator'];
+        // Done
         return config;
-    }
+    },
+
+    /**
+     * 保存配置
+     * @param {{ hotkey: string }} config 配置
+     */
+    save(config) {
+        const jsonData = JSON.parse(Fs.readFileSync(packageJsonPath)),
+            menuItem = jsonData['main-menu'][menuItemKey];
+        // 快捷键
+        if (menuItem['accelerator'] !== config.hotkey) {
+            menuItem['accelerator'] = config.hotkey;
+            Fs.writeFileSync(packageJsonPath, JSON.stringify(jsonData, null, 2));
+        }
+    },
 
 }
 

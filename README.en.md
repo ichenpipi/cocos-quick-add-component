@@ -36,7 +36,7 @@ If you like this project, don't forget to star [![star](https://gitee.com/ifaswi
 
 Platform: Windows、macOS
 
-Engine: Cocos Creator 2.x.x
+Engine: Cocos Creator 2.x
 
 
 
@@ -49,6 +49,8 @@ You can find this extension in Cocos Store now, click on *Extension -> Cocos Sto
 Enter "**Quick Add Component**" in the search bar, find it and then install it.
 
 ![cocos-store](https://gitee.com/ifaswind/image-storage/raw/master/repositories/ccc-quick-add-component/cocos-store.png)
+
+*Quick Add Component: [https://store.cocos.com/app/detail/2712](https://store.cocos.com/app/detail/2712)*
 
 
 

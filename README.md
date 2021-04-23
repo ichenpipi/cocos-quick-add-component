@@ -36,7 +36,7 @@
 
 平台：Windows、macOS
 
-引擎：Cocos Creator 2.x.x（理论上通用）
+引擎：Cocos Creator 2.x
 
 
 
@@ -49,6 +49,8 @@
 在上方搜索栏中输入“**快速添加组件**”并搜索就可以找到本插件，点进去直接安装即可（建议安装到全局）。
 
 ![cocos-store](https://gitee.com/ifaswind/image-storage/raw/master/repositories/ccc-quick-add-component/cocos-store.png)
+
+*快速添加组件: [https://store.cocos.com/app/detail/2712](https://store.cocos.com/app/detail/2712)*
 
 
 

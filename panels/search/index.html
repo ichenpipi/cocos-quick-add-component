@@ -25,14 +25,14 @@
                 <li class="result-list-item" v-for="(value, index) in results" :key="index" :id="'item-' + index"
                     :class="[(index === selectedIndex) ? 'result-list-item-selected' : '']"
                     @click="onResultClick(value, index)" v-cloak>
-                    <img class="result-list-item-icon" src="../images/assets/component.png" alt="icon"></img>
+                    <img class="result-list-item-icon" src="../../images/assets/component.png" alt="icon"></img>
                     <span>{{value.name}}</span>
                 </li>
             </ul>
         </div>
     </div>
     <!-- 脚本 -->
-    <script src="../vue.min.js"></script>
+    <script src="../../lib/vue.min.js"></script>
     <script src="index.js"></script>
 </body>
 

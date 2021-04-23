@@ -2,7 +2,7 @@ module.exports = {
 
     /**
      * 获取所有组件
-     * @param {any} event 
+     * @param {*} event 
      */
     'get-all-components': function (event) {
         // 获取所有组件
@@ -13,13 +13,16 @@ module.exports = {
 
     /**
      * 添加组件
-     * @param {any} event 
-     * @param {{uuids: string[]; name: string}} data 
+     * @param {*} event 
+     * @param {{ uuids: string[], name: string }} data 数据
      */
     'add-component': function (event, data) {
         // 获取组件 id
         const id = this.getComponentId(data.name);
-        if (!id) return;
+        if (!id) {
+            event.reply(null);
+            return;
+        }
         // 添加组件到节点
         Editor.Ipc.sendToPanel('scene', 'scene:add-component', data.uuids, id);
         event.reply(null);
@@ -39,7 +42,7 @@ module.exports = {
 
     /**
      * 获取组件 id
-     * @param {string} name 
+     * @param {string} name 组件名称
      * @returns {string}
      */
     getComponentId(name) {

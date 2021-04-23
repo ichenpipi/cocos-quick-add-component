@@ -1,14 +1,18 @@
 const ConfigManager = require('./config-manager');
 const { BrowserWindow, ipcMain } = require('electron');
 
-/** i18n */
-const translate = Editor.T;
-
 /** 包名 */
 const PACKAGE_NAME = 'ccc-quick-add-component';
 
+/**
+ * i18n
+ * @param {string} key
+ * @returns {string}
+ */
+const translate = (key) => Editor.T(`${PACKAGE_NAME}.${key}`);
+
 /** 扩展名 */
-const EXTENSION_NAME = translate(`${PACKAGE_NAME}.name`);
+const EXTENSION_NAME = translate('name');
 
 module.exports = {
 
@@ -35,10 +39,10 @@ module.exports = {
      */
     'open-search-panel'() {
       if (this.getSelectedNodeUuids().length === 0) {
-        Editor.log(`[${EXTENSION_NAME}]`, translate(`${PACKAGE_NAME}.nodeError`));
+        Editor.log(`[${EXTENSION_NAME}]`, translate('nodeError'));
         return;
       }
-      this.showSearchBar();
+      this.openSearchBar();
     },
 
     /**
@@ -120,7 +124,7 @@ module.exports = {
     // 获取当前选中节点 uuid
     const uuids = this.getSelectedNodeUuids();
     if (uuids.length === 0) {
-      Editor.log(`[${EXTENSION_NAME}]`, translate(`${PACKAGE_NAME}.nodeError`));
+      Editor.log(`[${EXTENSION_NAME}]`, translate('nodeError'));
       return;
     }
     // 调用场景脚本添加组件
@@ -135,7 +139,7 @@ module.exports = {
    * @param {*} event 
    */
   onCloseEvent() {
-    this.hideSearchBar();
+    this.closeSearchBar();
   },
 
   /**
@@ -150,54 +154,80 @@ module.exports = {
   /**
    * 展示搜索栏
    */
-  showSearchBar() {
+  openSearchBar() {
     // 已打开则关闭
     if (this.searchBar) {
-      this.hideSearchBar();
+      this.closeSearchBar();
       return;
     }
     // 创建窗口
-    const win = this.searchBar = new BrowserWindow({
-      width: 500,
-      height: 600,
-      frame: false,
-      resizable: false,
-      skipTaskbar: true,
-      alwaysOnTop: true,
-      transparent: true,
-      opacity: 0.95,
-      backgroundColor: '#00000000',
-      hasShadow: false,
-      show: false,
-      webPreferences: {
-        nodeIntegration: true
-      },
-    });
+    const winSize = [500, 600],
+      winPos = this.getPosition(winSize),
+      win = this.searchBar = new BrowserWindow({
+        width: winSize[0],
+        height: winSize[1],
+        x: winPos[0],
+        y: winPos[1],
+        frame: false,
+        resizable: false,
+        skipTaskbar: true,
+        alwaysOnTop: true,
+        transparent: true,
+        opacity: 0.95,
+        backgroundColor: '#00000000',
+        hasShadow: false,
+        show: false,
+        webPreferences: {
+          nodeIntegration: true
+        },
+      });
     // 加载页面
-    win.loadURL(`file://${__dirname}/search/index.html`);
+    win.loadURL(`file://${__dirname}/panels/search/index.html`);
     // 调试用的 devtools（detach 模式需要将失焦自动隐藏关掉）
     // win.webContents.openDevTools({ mode: 'detach' });
-    // 监听 ESC 按键（隐藏搜索栏）
+    // 监听按键（ESC 关闭）
     win.webContents.on('before-input-event', (event, input) => {
-      if (input.key === 'Escape') this.hideSearchBar();
+      if (input.key === 'Escape') {
+        this.closeSearchBar();
+      }
     });
-    // 展示后缓存数据
-    win.on('show', async () => (this.cache = await this.getAllComponents()));
-    // 失焦后自动隐藏
-    win.on('blur', () => this.hideSearchBar());
     // 就绪后展示（避免闪烁）
     win.on('ready-to-show', () => win.show());
+    // 展示后（缓存数据）
+    win.on('show', async () => (this.cache = await this.getAllComponents()));
+    // 失焦后（自动关闭）
+    win.on('blur', () => this.closeSearchBar());
+    // 关闭后（移除引用）
+    win.on('closed', () => (this.searchBar = null));
   },
 
   /**
    * 隐藏搜索栏
    */
-  hideSearchBar() {
-    if (!this.searchBar) return;
+  closeSearchBar() {
+    if (!this.searchBar) {
+      return;
+    }
     this.searchBar.close();
-    this.searchBar = null;
     // 清除缓存
     this.cache = null;
+  },
+
+  /**
+   * 获取窗口位置
+   * @param {[number, number]} size 窗口尺寸
+   * @returns {[number, number]}
+   */
+  getPosition(size) {
+    // 根据编辑器窗口的位置和尺寸来计算
+    const editorWin = BrowserWindow.getFocusedWindow(),
+      editorSize = editorWin.getSize(),
+      editorPos = editorWin.getPosition(),
+      // 需要注意一个问题：窗口的位置值必须是整数，否则修改不会生效
+      // 毕竟像素应该是显示器上的最低单位了，合理
+      x = Math.floor(editorPos[0] + (editorSize[0] / 2) - (size[0] / 2)),
+      y = Math.floor(editorPos[1] + 200);
+    return [x, y];
   },
 
   /**
@@ -216,7 +246,7 @@ module.exports = {
   /**
    * 获取匹配关键词的组件
    * @param {string} keyword 关键词
-   * @returns {Promise<{ name: string, similarity:number }[]>}
+   * @returns {Promise<{ name: string, similarity: number }[]>}
    */
   getMatchComponents(keyword) {
     return new Promise(async (res) => {
