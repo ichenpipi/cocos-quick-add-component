@@ -78,7 +78,6 @@ module.exports = {
    */
   load() {
     // 监听事件
-    ipcMain.on(`${PACKAGE_NAME}:get-lang`, this.onGetLangEvent.bind(this));
     ipcMain.on(`${PACKAGE_NAME}:match-keyword`, this.onMatchKeywordEvent.bind(this));
     ipcMain.on(`${PACKAGE_NAME}:add-component`, this.onAddComponentEvent.bind(this));
     ipcMain.on(`${PACKAGE_NAME}:close`, this.onCloseEvent.bind(this));
@@ -89,19 +88,9 @@ module.exports = {
    */
   unload() {
     // 取消事件监听
-    ipcMain.removeAllListeners(`${PACKAGE_NAME}:get-lang`);
     ipcMain.removeAllListeners(`${PACKAGE_NAME}:match-keyword`);
     ipcMain.removeAllListeners(`${PACKAGE_NAME}:add-component`);
     ipcMain.removeAllListeners(`${PACKAGE_NAME}:close`);
-  },
-
-  /**
-   * （渲染进程）获取语言事件回调
-   * @param {*} event 
-   */
-  onGetLangEvent(event) {
-    const lang = Editor.lang;
-    event.reply(`${PACKAGE_NAME}:get-lang-reply`, lang);
   },
 
   /**
@@ -181,8 +170,9 @@ module.exports = {
           nodeIntegration: true
         },
       });
-    // 加载页面
-    win.loadURL(`file://${__dirname}/panels/search/index.html`);
+    // 加载页面（并传递当前语言）
+    const lang = Editor.lang;
+    win.loadURL(`file://${__dirname}/panels/search/index.html?lang=${lang}`);
     // 调试用的 devtools（detach 模式需要将失焦自动隐藏关掉）
     // win.webContents.openDevTools({ mode: 'detach' });
     // 监听按键（ESC 关闭）
@@ -208,6 +198,11 @@ module.exports = {
     if (!this.searchBar) {
       return;
     }
+    // 先隐藏
+    // 在 2.4.5 版本中，扩展如果安装在局部，关闭搜索栏会引发编辑器闪退
+    // 原因未知，修改为先隐藏再关闭就没问题了（离谱）
+    this.searchBar.hide();
+    // 关闭
     this.searchBar.close();
     // 清除缓存
     this.cache = null;

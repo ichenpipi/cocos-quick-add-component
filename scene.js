@@ -6,7 +6,7 @@ module.exports = {
      */
     'get-all-components': function (event) {
         // 获取所有组件
-        const components = this.getAllComponents();
+        const components = getAllComponents();
         // 返回结果给主进程
         event.reply(null, components);
     },
@@ -18,7 +18,7 @@ module.exports = {
      */
     'add-component': function (event, data) {
         // 获取组件 id
-        const id = this.getComponentId(data.name);
+        const id = getComponentId(data.name);
         if (!id) {
             event.reply(null);
             return;
@@ -28,32 +28,32 @@ module.exports = {
         event.reply(null);
     },
 
-    /**
-     * 获取所有组件
-     * @returns {string[]}
-     */
-    getAllComponents() {
-        // 组件菜单数据
-        const items = cc._componentMenuItems;
-        // 组件名列表
-        const components = items.map(item => cc.js.getClassName(item.component));
-        return components;
-    },
+}
 
-    /**
-     * 获取组件 id
-     * @param {string} name 组件名称
-     * @returns {string}
-     */
-    getComponentId(name) {
-        const items = cc._componentMenuItems;
-        for (let i = 0, l = items.length; i < l; i++) {
-            const component = items[i].component;
-            if (cc.js.getClassName(component) === name) {
-                return cc.js._getClassId(component);
-            }
+/**
+ * 获取所有组件
+ * @returns {string[]}
+ */
+function getAllComponents() {
+    // 组件菜单数据
+    const items = cc._componentMenuItems;
+    // 组件名列表
+    const components = items.map(item => cc.js.getClassName(item.component));
+    return components;
+}
+
+/**
+ * 获取组件 id
+ * @param {string} name 组件名称
+ * @returns {string}
+ */
+function getComponentId(name) {
+    const items = cc._componentMenuItems;
+    for (let i = 0, l = items.length; i < l; i++) {
+        const component = items[i].component;
+        if (cc.js.getClassName(component) === name) {
+            return cc.js._getClassId(component);
         }
-        return null;
-    },
-
+    }
+    return null;
 }

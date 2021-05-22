@@ -1,4 +1,5 @@
 const { ipcRenderer } = require('electron');
+const BrowserUtils = require('../../utils/browser-utils.js');
 
 /** 包名 */
 const PACKAGE_NAME = 'ccc-quick-add-component';
@@ -16,9 +17,9 @@ new Vue({
     /** 关键词匹配返回的结果 */
     results: [],
     /** 当前选中的结果 */
-    selected: null,
+    curItem: null,
     /** 当前选中的结果下标 */
-    selectedIndex: -1,
+    curIndex: -1,
     /** 分段加载定时器 */
     loadHandler: null,
   },
@@ -30,9 +31,14 @@ new Vue({
      * @param {*} event 
      */
     onInputChange(event) {
+      // 取消分帧加载
+      if (this.loadHandler !== null) {
+        clearTimeout(this.loadHandler);
+        this.loadHandler = null;
+      }
       // 取消当前选中
-      this.selected = null;
-      this.selectedIndex = -1;
+      this.curItem = null;
+      this.curIndex = -1;
       // 关键字为空或无效时不进行搜索
       const keyword = this.keyword;
       if (keyword === '' || keyword.includes('...')) {
@@ -51,10 +57,10 @@ new Vue({
       // 阻止默认事件（光标移动）
       event.preventDefault();
       // 循环选择
-      if (this.selectedIndex > 0) {
-        this.selectedIndex--;
+      if (this.curIndex > 0) {
+        this.curIndex--;
       } else {
-        this.selectedIndex = this.results.length - 1;
+        this.curIndex = this.results.length - 1;
       }
       // 更新选择
       this.updateSelected();
@@ -68,10 +74,10 @@ new Vue({
       // 阻止默认事件（光标移动）
       event.preventDefault();
       // 循环选择
-      if (this.selectedIndex >= this.results.length - 1) {
-        this.selectedIndex = 0;
+      if (this.curIndex >= this.results.length - 1) {
+        this.curIndex = 0;
       } else {
-        this.selectedIndex++;
+        this.curIndex++;
       }
       // 更新选择
       this.updateSelected();
@@ -81,10 +87,10 @@ new Vue({
      * 更新当前的选择
      */
     updateSelected() {
-      this.selected = this.results[this.selectedIndex];
-      this.keyword = this.selected.name;
+      this.curItem = this.results[this.curIndex];
+      this.keyword = this.curItem.name;
       // 只有当目标元素不在可视区域内才滚动
-      const id = `item-${this.selectedIndex}`;
+      const id = `item-${this.curIndex}`;
       document.getElementById(id).scrollIntoViewIfNeeded(false);
     },
 
@@ -94,8 +100,8 @@ new Vue({
      * @param {number} index 
      */
     onResultClick(value, index) {
-      this.selectedIndex = parseInt(index);
-      this.selected = value;
+      this.curIndex = parseInt(index);
+      this.curItem = value;
       this.keyword = value.name;
       // 添加组件
       this.onEnterBtnClick(null);
@@ -109,18 +115,18 @@ new Vue({
      * @param {*} event 
      */
     onEnterBtnClick(event) {
-      const selected = this.selected;
-      if (!selected) {
+      const item = this.curItem;
+      if (!item) {
         if (this.keyword === '') return;
         // 输入框文本动画
         const input = this.$refs.input;
-        input.classList.add('search-input-error');
-        setTimeout(() => input.classList.remove('search-input-error'), 500);
+        input.classList.add('input-error');
+        setTimeout(() => input.classList.remove('input-error'), 500);
         return;
       }
-      this.keyword = selected.name;
+      this.keyword = item.name;
       // 发消息给主进程
-      ipcRenderer.send(`${PACKAGE_NAME}:add-component`, selected.name);
+      ipcRenderer.send(`${PACKAGE_NAME}:add-component`, item.name);
       // 聚焦到输入框（此时焦点在按钮或列表上）
       this.focusOnInputField();
     },
@@ -133,12 +139,11 @@ new Vue({
     },
 
     /**
-     * （主进程）获取语言回调
-     * @param {*} event 
-     * @param {string} lang 语言
+     * 更新语言
      */
-    onGetLangReply(event, lang) {
-      const texts = lang.includes('zh') ? zh : en;
+    updateLang() {
+      const lang = BrowserUtils.getUrlParam('lang'),
+        texts = lang.includes('zh') ? zh : en;
       this.placeholder = texts.placeholder;
       this.button = texts.button;
     },
@@ -154,8 +159,8 @@ new Vue({
       // 当只有一个结果时直接选中
       if (results.length === 1) {
         this.results = results;
-        this.selectedIndex = 0;
-        this.selected = results[0];
+        this.curIndex = 0;
+        this.curItem = results[0];
         return;
       }
       // 结果数量多时分段加载
@@ -202,13 +207,15 @@ new Vue({
    */
   mounted() {
     // 监听事件
-    ipcRenderer.on(`${PACKAGE_NAME}:get-lang-reply`, this.onGetLangReply.bind(this));
     ipcRenderer.on(`${PACKAGE_NAME}:match-keyword-reply`, this.onMatchKeywordReply.bind(this));
     ipcRenderer.on(`${PACKAGE_NAME}:add-component-reply`, this.onAddComponentReply.bind(this));
-    // 发送事件：获取语言
-    ipcRenderer.send(`${PACKAGE_NAME}:get-lang`);
-    // （下一帧）聚焦到输入框
-    this.$nextTick(() => this.focusOnInputField());
+    // 下一帧
+    this.$nextTick(() => {
+      // 更新语言
+      this.updateLang();
+      // 聚焦到输入框
+      this.focusOnInputField()
+    });
   },
 
   /**
@@ -216,7 +223,6 @@ new Vue({
    */
   beforeDestroy() {
     // 取消事件监听
-    ipcRenderer.removeAllListeners(`${PACKAGE_NAME}:get-lang-reply`);
     ipcRenderer.removeAllListeners(`${PACKAGE_NAME}:match-keyword-reply`);
     ipcRenderer.removeAllListeners(`${PACKAGE_NAME}:add-component-reply`);
   },
