@@ -1,44 +1,42 @@
 {
   "name": "ccc-quick-add-component",
-  "version": "1.0.3.20210522",
-  "description": "快速搜索并添加组件到节点上",
-  "author": "ifaswind（陈皮皮）",
-  "author-info": {
-    "wechat": "im_chenpipi",
+  "version": "1.1.0.20210927",
+  "description": "快速搜索并添加组件到节点上...",
+  "author": {
+    "name": "陈皮皮 (ifaswind)",
     "email": "952157129@qq.com",
+    "url": "https://chenpipi.cn",
+    "wechat": "im_chenpipi",
     "git-home": "https://gitee.com/ifaswind",
     "official-account": "公众号「菜鸟小栈」"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://gitee.com/ifaswind/ccc-quick-add-component"
-  },
-  "main": "main.js",
-  "scene-script": "scene.js",
+  "repository": "https://gitee.com/ifaswind/ccc-quick-add-component",
+  "license": "MIT",
+  "main": "src/main/index.js",
+  "scene-script": "src/main/scene.js",
   "main-menu": {
     "i18n:MAIN_MENU.package.title/i18n:ccc-quick-add-component.name/i18n:ccc-quick-add-component.search": {
-      "message": "ccc-quick-add-component:open-search-panel",
+      "message": "ccc-quick-add-component:open-search-bar",
       "icon": "/images/search.png",
       "accelerator": "F3"
     },
-    "i18n:MAIN_MENU.package.title/i18n:ccc-quick-add-component.name/i18n:ccc-quick-add-component.setting": {
-      "message": "ccc-quick-add-component:open-setting-panel",
-      "icon": "/images/setting.png"
+    "i18n:MAIN_MENU.package.title/i18n:ccc-quick-add-component.name/i18n:ccc-quick-add-component.settings": {
+      "message": "ccc-quick-add-component:open-settings-panel",
+      "icon": "/images/settings.png"
+    },
+    "i18n:MAIN_MENU.package.title/i18n:ccc-quick-add-component.name/i18n:ccc-quick-add-component.checkUpdate": {
+      "message": "ccc-quick-add-component:menu-check-update",
+      "icon": "/images/update.png"
+    },
+    "i18n:MAIN_MENU.package.title/i18n:ccc-quick-add-component.name/v1.1.0.20210927": {
+      "message": "ccc-quick-add-component:menu-version",
+      "icon": "/images/version.png"
     }
   },
-  "panel.setting": {
-    "main": "panel.setting/index.js",
-    "type": "fixed-size",
-    "title": "i18n:ccc-quick-add-component.name",
-    "width": 550,
-    "height": 343
-  },
   "reload": {
-    "renderer": [
-      "panel.setting/*"
-    ],
+    "renderer": [],
     "ignore": [
-      "search/*",
+      "config.json",
       "CHANGELOG.md",
       "README.md",
       "README.en.md"
