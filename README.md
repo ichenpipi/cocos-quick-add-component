@@ -63,7 +63,7 @@
 - Windows：解压到 `C:\Users\${你的用户名}\.CocosCreator\packages\` 目录下
 - macOS：解压到 `~/.CocosCreator/packages/` 目录下
 
-以 Windows 为例，扩展的 `main.js` 文件在我的电脑上的完整目录为 `C:\Users\Shaun\.CocosCreator\packages\ccc-quick-add-component\main.js`。
+以 Windows 为例，扩展的 `package.json` 文件在我的电脑上的完整目录为 `C:\Users\Shaun\.CocosCreator\packages\ccc-quick-add-component\package.json`。
 
 
 

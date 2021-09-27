@@ -63,7 +63,7 @@ And then unzip the package:
 - Windows: Unzip to `C:\Users\${your username}\.CocosCreator\packages\`
 - macOS: Unzip to `~/.CocosCreator/packages/`
 
-For example, on my Windows computer, the full path of `main.js` file should be `C:\Users\Shaun\.CocosCreator\packages\ccc-quick-add-component\main.js`.
+For example, on my Windows computer, the full path of `package.json` file should be `C:\Users\Shaun\.CocosCreator\packages\ccc-quick-add-component\package.json`.
 
 
 
