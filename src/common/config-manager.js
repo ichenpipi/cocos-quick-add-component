@@ -18,11 +18,6 @@ const ACTION_NAME = 'search';
 const MENU_ITEM_KEY = `i18n:MAIN_MENU.package.title/i18n:${PACKAGE_NAME}.name/i18n:${PACKAGE_NAME}.${ACTION_NAME}`;
 
 /**
- * 配置缓存
- */
-let configCache = null;
-
-/**
  * 配置管理器
  */
 const ConfigManager = {
@@ -51,8 +46,6 @@ const ConfigManager = {
                 }
             }
         }
-        // 缓存起来
-        configCache = JSON.parse(JSON.stringify(config));
 
         // 快捷键
         config.hotkey = ConfigManager.getAccelerator();
@@ -74,8 +67,6 @@ const ConfigManager = {
             }
         }
         Fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
-        // 缓存起来
-        configCache = JSON.parse(JSON.stringify(config));
 
         // 快捷键
         ConfigManager.setAccelerator(value.hotkey);
